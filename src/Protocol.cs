@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 
+
 namespace Protocol
 {
     class OpenConnectionInput
@@ -41,18 +42,5 @@ namespace Protocol
         public required string Topic { get; set; }
         [JsonPropertyName("content")]
         public required string Content { get; set; }
-    }
-
-    class GenericErrorResponse
-    {
-        [JsonPropertyName("error")]
-        public required string ErrorString { get; set; }
-    }
-
-    class Response
-    {
-        public required int RequestID { get; set; }
-        public required bool IsSuccess { get; set; }
-        public required string? PayloadSerialized { get; set; }
     }
 }

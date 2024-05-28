@@ -2,26 +2,23 @@
 using System.Net.Sockets;
 using System.Text;
 
-class ChatClient(LSocket socket)
+class ChatClient
 {
-    private readonly LSocket Socket = socket;
+    private readonly RpcClient RpcClient;
     public string Nickname { get; private set; } = Guid.NewGuid().ToString();
     public bool IsOpen { get; private set; } = false;
     public bool IsAuthenticated { get; private set; } = false;
 
-    private async Task<Protocol.Response> HandleOpenCommand()
+    public ChatClient(RpcClient rpcClient)
     {
-        return new Protocol.Response()
+        RpcClient = rpcClient;
+
+        RpcClient.ReqHandler = async (req) =>
         {
-            RequestID = 0,
-            IsSuccess = false,
-            PayloadSerialized = null
+            return new Dictionary<string, string>() {
+                { "hello", "world"}
+            };
         };
-    }
-
-    public async Task InvokeClientCommand()
-    {
-
     }
 
     public async Task HandleCommand(string commandKind, string commandData)

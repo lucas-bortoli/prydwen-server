@@ -25,10 +25,10 @@ static class Server
 
         try
         {
-            LSocket socket = new LSocket(tcpSocket.GetStream());
-            ChatClient client = new ChatClient(socket);
+            RpcClient rpcClient = new RpcClient(tcpSocket.GetStream());
+            ChatClient client = new ChatClient(rpcClient);
 
-            socket.ConsumeStream().Wait();
+            await rpcClient.StartListening();
         }
         catch (Exception ex)
         {
