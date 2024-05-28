@@ -66,11 +66,11 @@ namespace Database
 
     public class Message
     {
-        public long Id { get; set; }
-        public string AuthorNickname { get; set; }
-        public string Topic { get; set; }
-        public string Content { get; set; }
-        public DateTime CreationDate { get; set; }
+        public required long Id { get; set; }
+        public required string AuthorNickname { get; set; }
+        public required string Topic { get; set; }
+        public required string Content { get; set; }
+        public required DateTime CreationDate { get; set; }
     }
 
 }

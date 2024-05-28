@@ -2,20 +2,25 @@
 using System.Net.Sockets;
 using System.Text;
 
-class ChatClient(TcpClient socket)
+class ChatClient(LSocket socket)
 {
-    readonly TcpClient Socket = socket;
-
+    private readonly LSocket Socket = socket;
     public string Nickname { get; private set; } = Guid.NewGuid().ToString();
     public bool IsOpen { get; private set; } = false;
     public bool IsAuthenticated { get; private set; } = false;
 
-    private async Task HandleOpenCommand()
+    private async Task<Protocol.Response> HandleOpenCommand()
     {
-        if (IsOpen)
+        return new Protocol.Response()
         {
-            await Socket.GetStream().WriteAsync(Encoding.UTF8.GetBytes("OK MAN!\n"));
-        }
+            RequestID = 0,
+            IsSuccess = false,
+            PayloadSerialized = null
+        };
+    }
+
+    public async Task InvokeClientCommand()
+    {
 
     }
 

@@ -25,44 +25,15 @@ static class Server
 
         try
         {
-            using StreamReader reader = new StreamReader(tcpSocket.GetStream());
-            ChatClient client = new ChatClient(tcpSocket);
+            LSocket socket = new LSocket(tcpSocket.GetStream());
+            ChatClient client = new ChatClient(socket);
 
-            Clients.Add(client);
-
-            // Receber mensagens do cliente, enquanto estiver conectado
-            while (true)
-            {
-                string? line = await reader.ReadLineAsync();
-
-                if (line == null)
-                {
-                    // The client has disconnected gracefully
-                    Console.WriteLine("Client disconnected.");
-                    break;
-                }
-
-                // Interpret the line from the protocol
-                string commandKind = line.Split(' ')[0].ToUpper();
-                string commandData = line.Substring(commandKind.Length);
-
-                await client.HandleCommand(commandKind, commandData);
-            }
-        }
-        catch (IOException ex)
-        {
-            // This can occur if the network stream is interrupted
-            Console.WriteLine($"Network error: {ex.Message}");
-        }
-        catch (ObjectDisposedException ex)
-        {
-            // This can occur if the TcpClient or its stream is disposed
-            Console.WriteLine($"Connection closed: {ex.Message}");
+            socket.ConsumeStream().Wait();
         }
         catch (Exception ex)
         {
-            // General exception handling for any other unforeseen errors
             Console.WriteLine($"Unexpected error: {ex.Message}");
+            throw;
         }
         finally
         {
@@ -74,5 +45,10 @@ static class Server
             tcpSocket.Dispose();
             Console.WriteLine("Connection closed and resources released.");
         }
+    }
+
+    private static async Task HandleCommandRequest()
+    {
+
     }
 }
