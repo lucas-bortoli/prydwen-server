@@ -13,7 +13,7 @@ class RpcClient(NetworkStream stream)
     private int _requestCounter = 0;
 
     // Envia um request para o outro par.
-    public async Task<Res> SendRequest<Req, Res>(string kind, Req payload)
+    public async Task<Res> SendRequest<Req, Res>(string kind, Req payload, bool requireResponse = true)
     {
         int requestId = ++_requestCounter;
         string imperative = kind.Trim().ToUpper();
@@ -109,7 +109,9 @@ class RpcClient(NetworkStream stream)
                     }
                     catch (Exception ex)
                     {
-                        res = new Response<object>(req.RequestId, false, ex);
+                        res = new Response<object>(req.RequestId, false, new Dictionary<string, string> {
+                            { "error", ex.ToString() }
+                        });
                     }
 
                     // Enviar resposta no socket, com encoding UTF8

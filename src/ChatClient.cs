@@ -5,42 +5,87 @@ using System.Text;
 class ChatClient
 {
     private readonly RpcClient RpcClient;
-    public string Nickname { get; private set; } = Guid.NewGuid().ToString();
-    public bool IsOpen { get; private set; } = false;
+    public string? Nickname { get; private set; } = null;
     public bool IsAuthenticated { get; private set; } = false;
 
     public ChatClient(RpcClient rpcClient)
     {
         RpcClient = rpcClient;
 
-        RpcClient.ReqHandler = async (req) =>
-        {
-            return new Dictionary<string, string>() {
-                { "hello", "world"}
-            };
-        };
+        RpcClient.ReqHandler = HandleCommand;
     }
 
-    public async Task HandleCommand(string commandKind, string commandData)
+    private async Task<object> HandleCommand(Request<object> request)
     {
-        Console.WriteLine($"Comando = {commandKind}    dados = {commandData}");
+        string procedure = request.Action;
 
-        switch (commandKind)
+        Console.WriteLine($"Procedure chamada: {procedure}");
+
+        if (procedure == "OPEN")
         {
-            case "OPEN":
-                break;
-            case "LOGIN":
-                break;
-            case "REGISTER":
-                break;
-            case "JOIN_TOPIC":
-                break;
-            case "LEAVE_TOPIC":
-                break;
-            case "SEND_MESSAGE":
-                break;
-            default:
-                throw new Exception($"Comando desconhecido: {commandKind}");
+            var reqBody = (Protocol.OpenConnectionInput)request.Content;
+
+            // Ao mudar o nickname, desautenticar cliente
+            Nickname = reqBody.Nickname;
+            IsAuthenticated = false;
+
+            return new object { };
         }
+        else if (procedure == "LOGIN")
+        {
+            var reqBody = (Protocol.LoginNicknameInput)request.Content;
+
+            if (Nickname is null) throw new ChatNicknameNotSetException();
+            if (IsAuthenticated) throw new ChatAlreadyAuthenticatedException();
+
+            // fazer autenticação...
+
+            IsAuthenticated = true;
+
+            return new object { };
+        }
+        else if (procedure == "REGISTER")
+        {
+            var reqBody = (Protocol.RegisterNicknameInput)request.Content;
+
+            if (Nickname is null) throw new ChatNicknameNotSetException();
+            if (IsAuthenticated) throw new ChatAlreadyAuthenticatedException();
+
+            // fazer registro...
+
+            IsAuthenticated = true;
+
+            return new object { };
+        }
+        else if (procedure == "JOIN_TOPIC")
+        {
+            var reqBody = (Protocol.JoinTopicInput)request.Content;
+
+            if (Nickname is null) throw new ChatNicknameNotSetException();
+            if (!IsAuthenticated) throw new ChatNotAuthenticatedException();
+
+            return new object { };
+        }
+        else if (procedure == "LEAVE_TOPIC")
+        {
+            var reqBody = (Protocol.JoinTopicInput)request.Content;
+
+            if (Nickname is null) throw new ChatNicknameNotSetException();
+            if (!IsAuthenticated) throw new ChatNotAuthenticatedException();
+
+            return new object { };
+        }
+        else if (procedure == "SEND_MESSAGE")
+        {
+            var reqBody = (Protocol.SendMessageInput)request.Content;
+
+            if (Nickname is null) throw new ChatNicknameNotSetException();
+            if (!IsAuthenticated) throw new ChatNotAuthenticatedException();
+
+            return new object { };
+        }
+
+        throw new Exception($"Procedure desconhecida: {procedure}");
+
     }
 }
